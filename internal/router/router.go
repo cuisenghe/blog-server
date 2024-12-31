@@ -5,6 +5,10 @@ import (
 	"blog-server/datasbase/redis"
 	"blog-server/internal/api/article"
 	"blog-server/internal/api/blogConfig"
+	"blog-server/internal/api/chat"
+	"blog-server/internal/api/pageHeader"
+	"blog-server/internal/api/statistic"
+	"blog-server/internal/api/tag"
 	"blog-server/internal/api/user"
 	"github.com/gin-gonic/gin"
 )
@@ -49,10 +53,11 @@ func initHandler(r *gin.Engine) {
 		handler := article.NewHandler()
 		// 前台
 		articleGroup.GET("/blogHomeGetArticleList/:current/:size", handler.GetArticleList)
-		articleGroup.GET("/blogTimelineGetArticleList/:current/:size", handler.GetArticleList)
+		articleGroup.GET("/blogTimelineGetArticleList/:current/:size", handler.BlogTimelineGetArticleList)
 		articleGroup.POST("/getArticleListByTagId", handler.GetArticleListByTagId)
 		articleGroup.GET("/getRecommendArticleById/:id", handler.GetRecommendArticleById)
 		articleGroup.GET("/getArticleListByContent/:content", handler.GetArticleListByContent)
+		articleGroup.GET("/getHotArticle", handler.GetHotArticle)
 		// 后台
 		articleGroup.POST("/add", handler.AddArticle)
 		articleGroup.POST("/update", handler.UpdateArticle)
@@ -68,5 +73,25 @@ func initHandler(r *gin.Engine) {
 		handler := blogConfig.NewHandler()
 		configGroup.GET("", handler.GetConfig)
 		configGroup.PUT("/addView", handler.AddView)
+	}
+	chatGroup := r.Group("/chat")
+	{
+		handler := chat.NewHandler()
+		chatGroup.POST("/getChatList", handler.GetChatList)
+	}
+	pageHeadGroup := r.Group("/pageHeader")
+	{
+		handler := pageHeader.NewHandler()
+		pageHeadGroup.GET("/getAll", handler.GetAll)
+	}
+	statisticGroup := r.Group("/statistic")
+	{
+		handler := statistic.NewHandler()
+		statisticGroup.GET("", handler.GetStatistic)
+	}
+	tagGroup := r.Group("/tag")
+	{
+		handler := tag.NewHandler()
+		tagGroup.GET("/getTagDictionary", handler.GetTagDictionary)
 	}
 }

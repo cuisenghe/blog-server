@@ -30,7 +30,7 @@ func (a Article) TableName() string {
 }
 func GetArticleList(ctx *gin.Context, current, size int) ([]*Article, error) {
 	//db
-	db := ctx.MustGet("db").(*gorm.DB)
+	db := ctx.MustGet(constants.DB).(*gorm.DB)
 	var articles []*Article
 	// 查询
 	offset := (current - 1) * size

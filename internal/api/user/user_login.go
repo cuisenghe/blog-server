@@ -21,5 +21,5 @@ func (h *Handler) Login(ctx *gin.Context) {
 		api.ReturnBizError(ctx, err)
 		return
 	}
-	api.ReturnSuccess(ctx, token)
+	api.ReturnSuccess(ctx, map[string]string{"token": token})
 }

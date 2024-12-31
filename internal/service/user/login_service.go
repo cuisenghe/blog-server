@@ -25,7 +25,7 @@ func (s *service) Login(ctx *gin.Context, username string, password string) (str
 	// 如果存在用户，判断密码是否正确
 	passwordErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if passwordErr != nil {
-		return "", err
+		return "", bizErr.NewBizError(constants.USER_PASS_FAILED, "用户名密码错误")
 	}
 	// 如果正确的话，创建token
 	token, err := authToken.GenerateToken(user.Username)

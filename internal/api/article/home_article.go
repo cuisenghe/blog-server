@@ -100,3 +100,6 @@ func (h *Handler) GetArticleListByContent(ctx *gin.Context) {
 	}
 	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Size, resp.List, resp.Total)
 }
+func (h *Handler) GetHotArticle(ctx *gin.Context) {
+
+}

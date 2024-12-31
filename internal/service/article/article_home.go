@@ -20,10 +20,14 @@ type ArticleListResp struct {
 	Total   int64                 `json:"total"`
 }
 type SimpleArticleListResp struct {
-	Current int              `json:"current"`
-	Size    int              `json:"size"`
-	List    []*SimpleArticle `json:"list"`
-	Total   int64            `json:"total"`
+	Current int                  `json:"current"`
+	Size    int                  `json:"size"`
+	List    []*SimpleArticleList `json:"list"`
+	Total   int64                `json:"total"`
+}
+type SimpleArticleList struct {
+	Year        string           `json:"year"`
+	ArticleList []*SimpleArticle `json:"articleList"`
 }
 type SimpleArticle struct {
 	ID           int       `json:"id"`
@@ -96,18 +100,35 @@ func (s *service) BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleList
 	return resp, nil
 }
 func convertTimeLineData(list []*articleDao.Article) *SimpleArticleListResp {
-	timelineArticleList := make([]*SimpleArticle, 0, len(list))
+	// 分组
+	var resp SimpleArticleListResp
+	simpleList := make([]*SimpleArticleList, 0)
+	m := make(map[string]*SimpleArticleList)
 	for _, article := range list {
-		timelineArticleList = append(timelineArticleList, &SimpleArticle{
+		year := article.CreateAt.Format("2006")
+		// 获取对应的simpleArticleList
+		if _, ok := m[year]; !ok {
+			m[year] = &SimpleArticleList{
+				Year:        year,
+				ArticleList: make([]*SimpleArticle, 0),
+			}
+		}
+		articleList := m[year].ArticleList
+		articleList = append(articleList, &SimpleArticle{
 			ID:           article.ID,
 			ArticleTitle: article.ArticleTitle,
 			ArticleCover: article.ArticleCover,
 			CreatedAt:    article.CreateAt,
 		})
+		m[year].ArticleList = articleList
 	}
-	return &SimpleArticleListResp{
-		List: timelineArticleList,
+	// 遍历
+	for _, v := range m {
+		simpleList = append(simpleList, v)
 	}
+	resp.List = simpleList
+	// return
+	return &resp
 
 }
 func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) (*SimpleArticleListResp, error) {
@@ -173,6 +194,6 @@ func convertSearchData(list []*articleDao.Article) *ContentArticleList {
 	}
 }
 func (s *service) GetHotArticle(ctx *gin.Context) (*SimpleArticleListResp, error) {
-	
+
 	return &SimpleArticleListResp{}, nil
 }
