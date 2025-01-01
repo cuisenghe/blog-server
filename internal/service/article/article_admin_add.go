@@ -44,6 +44,9 @@ func (s *service) AddArticle(ctx *gin.Context, data *AddArticleData) (bool, erro
 	if err != nil {
 		return false, err
 	}
+	// todo 创建tag
+	// todo 创建category
+
 	return article, nil
 }
 func convertData(data *AddArticleData) *articleDao.Article {

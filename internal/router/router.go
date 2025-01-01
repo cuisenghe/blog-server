@@ -5,7 +5,10 @@ import (
 	"blog-server/datasbase/redis"
 	"blog-server/internal/api/article"
 	"blog-server/internal/api/blogConfig"
+	"blog-server/internal/api/category"
 	"blog-server/internal/api/chat"
+	"blog-server/internal/api/comment"
+	"blog-server/internal/api/like"
 	"blog-server/internal/api/pageHeader"
 	"blog-server/internal/api/statistic"
 	"blog-server/internal/api/tag"
@@ -94,5 +97,22 @@ func initHandler(r *gin.Engine) {
 	{
 		handler := tag.NewHandler()
 		tagGroup.GET("/getTagDictionary", handler.GetTagDictionary)
+	}
+	likeGroup := r.Group("/like")
+	{
+		handler := like.NewHandler()
+		likeGroup.POST("/getIsLikeByIdOrIpAndType", handler.GetIsLikeByIdAndType)
+		likeGroup.POST("/addLike", handler.AddLike)
+		likeGroup.POST("cancelLike", handler.CancelLike)
+	}
+	commentGroup := r.Group("/comment")
+	{
+		handler := comment.NewHandler()
+		commentGroup.POST("getCommentTotal", handler.GetCommentTotal)
+	}
+	categoryGroup := r.Group("/category")
+	{
+		handler := category.NewHandler()
+		categoryGroup.GET("/getCategoryDictionary", handler.GetCategoryDictionary)
 	}
 }

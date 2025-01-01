@@ -24,6 +24,7 @@ type Service interface {
 	GetRecommendArticleById(ctx *gin.Context, articleId int) (*RecommendArticleListResp, error)
 	GetArticleListByContent(ctx *gin.Context, content string) (*ContentArticleListResp, error)
 	GetHotArticle(ctx *gin.Context) (*SimpleArticleListResp, error)
+	GetArticleById(ctx *gin.Context, articleId int) (*DetailArticle, error)
 }
 type service struct {
 }

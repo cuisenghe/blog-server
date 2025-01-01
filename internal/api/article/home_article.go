@@ -105,5 +105,14 @@ func (h *Handler) GetHotArticle(ctx *gin.Context) {
 }
 
 func (h *Handler) GetArticleById(ctx *gin.Context) {
-
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return
+	}
+	resp, err := h.service.GetArticleById(ctx, id)
+	if err != nil {
+		api.ReturnFailWithPage(ctx, constants.FAIL, err.Error())
+		return
+	}
+	api.ReturnSuccess(ctx, resp)
 }

@@ -2,6 +2,7 @@ package article
 
 import (
 	"blog-server/internal/repository/articleDao"
+	"blog-server/internal/repository/tagDao"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -54,6 +55,11 @@ type ContentArticleListResp struct {
 type ContentArticleList struct {
 	Year        string           `json:"year"`
 	ArticleList []*SimpleArticle `json:"articleList"`
+}
+type DetailArticle struct {
+	*articleDao.Article
+	TagIdList   []int    `json:"tagIdList"`
+	TagNameList []string `json:"tagNameList"`
 }
 
 func (s *service) GetArticleList(ctx *gin.Context, req *ArticleListData) (*ArticleListResp, error) {
@@ -196,4 +202,22 @@ func convertSearchData(list []*articleDao.Article) *ContentArticleList {
 func (s *service) GetHotArticle(ctx *gin.Context) (*SimpleArticleListResp, error) {
 
 	return &SimpleArticleListResp{}, nil
+}
+func (s *service) GetArticleById(ctx *gin.Context, articleId int) (*DetailArticle, error) {
+	article, err := articleDao.GetArticleById(ctx, articleId)
+	if err != nil {
+		return nil, err
+	}
+	var resp DetailArticle
+	resp.Article = article
+	// 获取tag
+	ids, err := tagDao.GetTagIdsByArticleId(ctx, articleId)
+	tags, err := tagDao.GetTagsById(ctx, ids)
+	resp.TagIdList = ids
+	var tagNames []string
+	for _, tag := range tags {
+		tagNames = append(tagNames, tag.TagName)
+	}
+	resp.TagNameList = tagNames
+	return &resp, nil
 }

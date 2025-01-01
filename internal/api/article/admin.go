@@ -3,7 +3,6 @@ package article
 import (
 	"blog-server/internal/api"
 	"blog-server/internal/service/article"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -48,7 +47,6 @@ func (h *Handler) AddArticle(ctx *gin.Context) {
 	var req AddArticleReq
 	api.Binding(ctx, &req)
 	// 新增
-	fmt.Println(req)
 	addArticle, err := h.service.AddArticle(ctx, convertData(&req))
 	if err != nil {
 		api.ReturnBizError(ctx, err)
