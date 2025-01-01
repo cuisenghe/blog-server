@@ -7,7 +7,7 @@ import (
 
 type Service interface {
 	// login
-	Login(ctx *gin.Context, username string, password string) (string, error)
+	Login(ctx *gin.Context, username string, password string) (*Response, error)
 	Register(ctx *gin.Context, request *RegData) (uint64, error)
 	GetUserInfoById(ctx *gin.Context, id uint64) (*userDao.BlogUser, error)
 	UpdateUserInfo(ctx *gin.Context, user *userDao.BlogUser) (bool, error)

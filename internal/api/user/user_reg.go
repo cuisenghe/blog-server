@@ -4,6 +4,7 @@ import (
 	"blog-server/internal/api"
 	"blog-server/internal/service/user"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type RegisterRequest struct {
@@ -34,7 +35,11 @@ func (h *Handler) Register(ctx *gin.Context) {
 		Role:     req.Role,
 	})
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		log.Println("register err:", err)
+		api.ReturnBizErrorWithData(ctx, err, &RegisterResponse{
+			ID:       0,
+			Username: req.Username,
+		})
 		return
 	}
 	api.ReturnSuccess(ctx, &RegisterResponse{

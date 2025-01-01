@@ -103,3 +103,7 @@ func (h *Handler) GetArticleListByContent(ctx *gin.Context) {
 func (h *Handler) GetHotArticle(ctx *gin.Context) {
 
 }
+
+func (h *Handler) GetArticleById(ctx *gin.Context) {
+
+}

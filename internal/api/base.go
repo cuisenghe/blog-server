@@ -42,6 +42,18 @@ func ReturnBizError(ctx *gin.Context, err error) {
 		"result":  nil,
 	})
 }
+func ReturnBizErrorWithData(ctx *gin.Context, err error, data interface{}) {
+	var bizError *BizErr.BizError
+	ok := errors.As(err, &bizError)
+	if !ok {
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    bizError.Code,
+		"message": bizError.Message,
+		"result":  data,
+	})
+}
 
 // ReturnErrWithData 返回失败伴随数据
 func ReturnErrWithData(ctx *gin.Context, code int, msg string, data interface{}) {

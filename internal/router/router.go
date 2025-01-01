@@ -58,6 +58,7 @@ func initHandler(r *gin.Engine) {
 		articleGroup.GET("/getRecommendArticleById/:id", handler.GetRecommendArticleById)
 		articleGroup.GET("/getArticleListByContent/:content", handler.GetArticleListByContent)
 		articleGroup.GET("/getHotArticle", handler.GetHotArticle)
+		articleGroup.GET("/getArticleById/:id", handler.GetArticleById)
 		// 后台
 		articleGroup.POST("/add", handler.AddArticle)
 		articleGroup.POST("/update", handler.UpdateArticle)

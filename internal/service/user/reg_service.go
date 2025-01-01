@@ -40,7 +40,7 @@ func (s *service) Register(ctx *gin.Context, req *RegData) (uint64, error) {
 	userInfo, err = userDao.CreateUser(ctx, &userDao.BlogUser{
 		Username: req.Username,
 		Password: string(password),
-		Role:     req.Role,
+		Role:     constants.USER_ROLE,
 		NickName: req.NickName,
 		Avatar:   req.Avatar,
 		QQ:       req.QQ,
