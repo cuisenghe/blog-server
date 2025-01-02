@@ -22,7 +22,7 @@ type Response struct {
 func (s *service) Login(ctx *gin.Context, username string, password string) (*Response, error) {
 	// login的service
 	// 判断是否存在该用户
-	user, err := userDao.GetUserByUsername(ctx, username)
+	user, err := userDao.GetUserByUsername(GetDB(ctx), username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return &Response{
 			Token:    "",

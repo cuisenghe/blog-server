@@ -13,7 +13,7 @@ import (
 
 // base 工具类，用于结果的反回
 
-// ReturnSuccess 返回成功
+// ReturnSuccess 返回成功, 只要成功业务code为0，msg为success，不用特意告知哪些成功，数据为data
 func ReturnSuccess(ctx *gin.Context, data interface{}) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    constants.SUCCESS,
@@ -22,7 +22,7 @@ func ReturnSuccess(ctx *gin.Context, data interface{}) {
 	})
 }
 
-// ReturnError 返回失败
+// ReturnError 返回失败， 业务失败httpCode为200，业务code为指定code，msg由业务指定，数据默认为nil
 func ReturnError(ctx *gin.Context, code int, msg string) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    code,
@@ -30,6 +30,17 @@ func ReturnError(ctx *gin.Context, code int, msg string) {
 		"result":  nil,
 	})
 }
+
+// ReturnErrWithData 返回失败伴随数据
+func ReturnErrWithData(ctx *gin.Context, code int, msg string, data interface{}) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    code,
+		"message": msg,
+		"result":  data,
+	})
+}
+
+// ReturnBizError 返回失败，直接透传业务err，可以直接通过业务err返回， result仍然为nil
 func ReturnBizError(ctx *gin.Context, err error) {
 	var bizError *BizErr.BizError
 	ok := errors.As(err, &bizError)
@@ -42,6 +53,8 @@ func ReturnBizError(ctx *gin.Context, err error) {
 		"result":  nil,
 	})
 }
+
+// ReturnBizErrorWithData 返回业务错误并伴随data
 func ReturnBizErrorWithData(ctx *gin.Context, err error, data interface{}) {
 	var bizError *BizErr.BizError
 	ok := errors.As(err, &bizError)
@@ -55,16 +68,7 @@ func ReturnBizErrorWithData(ctx *gin.Context, err error, data interface{}) {
 	})
 }
 
-// ReturnErrWithData 返回失败伴随数据
-func ReturnErrWithData(ctx *gin.Context, code int, msg string, data interface{}) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    code,
-		"message": msg,
-		"result":  data,
-	})
-}
-
-// 进行数据绑定
+// Binding 进行数据绑定
 func Binding(ctx *gin.Context, data interface{}) {
 	if err := ctx.ShouldBindJSON(data); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -76,7 +80,7 @@ func GetDB(ctx *gin.Context) *gorm.DB {
 	return ctx.MustGet("db").(*gorm.DB)
 }
 
-// 分页返回
+// PageInfo 分页返回
 type PageInfo struct {
 	Current int         `json:"current"`
 	Size    int         `json:"size"`
@@ -103,6 +107,18 @@ func ReturnFailWithPage(ctx *gin.Context, code int, msg string) {
 			Current: 0,
 			Size:    0,
 			List:    nil,
+			Total:   0,
+		},
+		"message": msg,
+	})
+}
+func ReturnFailWithPageData(ctx *gin.Context, code int, msg string, data interface{}) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": code,
+		"result": &PageInfo{
+			Current: 0,
+			Size:    0,
+			List:    data,
 			Total:   0,
 		},
 		"message": msg,

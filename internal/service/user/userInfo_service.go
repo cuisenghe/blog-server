@@ -39,14 +39,14 @@ type GetUserListResp struct {
 
 func (s *service) GetUserInfoById(ctx *gin.Context, id uint64) (*userDao.BlogUser, error) {
 	// 获取db
-	user, err := userDao.GetUserById(ctx, id)
+	user, err := userDao.GetUserById(GetDB(ctx), id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 func (s *service) UpdateUserInfo(ctx *gin.Context, user *userDao.BlogUser) (bool, error) {
-	_, err := userDao.UpdateUser(ctx, user)
+	_, err := userDao.UpdateUser(GetDB(ctx), user)
 	if err != nil {
 		return false, err
 	}
@@ -56,7 +56,7 @@ func (s *service) UpdateUserInfo(ctx *gin.Context, user *userDao.BlogUser) (bool
 // 更改用户密码
 func (s *service) UpdatePassword(ctx *gin.Context, data *UserPasswordData) (bool, error) {
 	// 查询用户信息
-	user, err := userDao.GetUserById(ctx, data.ID)
+	user, err := userDao.GetUserById(GetDB(ctx), data.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, err
 	}
@@ -77,7 +77,7 @@ func (s *service) UpdatePassword(ctx *gin.Context, data *UserPasswordData) (bool
 	if err != nil {
 		return false, err
 	}
-	_, err = userDao.UpdatePassword(ctx, data.ID, string(password))
+	_, err = userDao.UpdatePassword(GetDB(ctx), data.ID, string(password))
 	if err != nil {
 		return false, err
 	}
@@ -87,7 +87,7 @@ func (s *service) UpdatePassword(ctx *gin.Context, data *UserPasswordData) (bool
 // 分页获取数据
 func (s *service) GetUserList(ctx *gin.Context, data *GetUserListData) (*GetUserListResp, error) {
 	// 获取数据
-	list, err := userDao.GetUserList(ctx, data.Current, data.Size, data.NickName, data.Role)
+	list, err := userDao.GetUserList(GetDB(ctx), data.Current, data.Size, data.NickName, data.Role)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (s *service) GetUserList(ctx *gin.Context, data *GetUserListData) (*GetUser
 		return &GetUserListResp{}, nil
 	}
 	// 获取数量
-	count, err := userDao.GetUserCount(ctx, data.Current, data.Size, data.NickName, data.Role)
+	count, err := userDao.GetUserCount(GetDB(ctx), data.Current, data.Size, data.NickName, data.Role)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}

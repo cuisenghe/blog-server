@@ -2,6 +2,7 @@ package article
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Service interface {
@@ -31,4 +32,7 @@ type service struct {
 
 func NewService() Service {
 	return &service{}
+}
+func GetDB(ctx *gin.Context) *gorm.DB {
+	return ctx.MustGet("DB").(*gorm.DB)
 }

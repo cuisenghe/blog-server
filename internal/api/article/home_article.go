@@ -6,6 +6,7 @@ import (
 	"blog-server/internal/service/article"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 
 	"strconv"
 )
@@ -21,10 +22,12 @@ func (h *Handler) GetArticleList(ctx *gin.Context) {
 	// binding
 	size, err := strconv.Atoi(ctx.Param("size"))
 	if err != nil {
+		api.ReturnBizError(ctx, err)
 		return
 	}
 	current, err := strconv.Atoi(ctx.Param("current"))
 	if err != nil {
+		api.ReturnBizError(ctx, err)
 		return
 	}
 	// service
@@ -33,6 +36,7 @@ func (h *Handler) GetArticleList(ctx *gin.Context) {
 		Current: current,
 	})
 	if err != nil {
+		api.ReturnBizError(ctx, err)
 		return
 	}
 	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Current, resp.List, resp.Total)
@@ -55,8 +59,10 @@ func (h *Handler) BlogTimelineGetArticleList(ctx *gin.Context) {
 		Current: current,
 	})
 	if err != nil {
+		slog.Error("获取时间线失败：", err.Error())
 		return
 	}
+
 	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Current, resp.List, resp.Total)
 }
 func (h *Handler) GetArticleListByTagId(ctx *gin.Context) {

@@ -6,7 +6,7 @@ import (
 )
 
 func (s *service) GetConfig(ctx *gin.Context) (*configDao.Config, error) {
-	config, err := configDao.GetConfig(ctx)
+	config, err := configDao.GetConfig(GetDB(ctx))
 	if err != nil {
 		return nil, err
 	}

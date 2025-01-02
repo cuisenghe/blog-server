@@ -1,8 +1,6 @@
 package userDao
 
 import (
-	"blog-server/constants"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"time"
 )
@@ -24,8 +22,7 @@ type BlogUser struct {
 func (user BlogUser) TableName() string {
 	return "blog_user"
 }
-func GetUserByUsername(ctx *gin.Context, username string) (*BlogUser, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetUserByUsername(db *gorm.DB, username string) (*BlogUser, error) {
 	var user *BlogUser
 	tx := db.Where("username = ?", username).First(&user)
 	if tx.Error != nil {
@@ -33,8 +30,7 @@ func GetUserByUsername(ctx *gin.Context, username string) (*BlogUser, error) {
 	}
 	return user, nil
 }
-func CreateUser(ctx *gin.Context, user *BlogUser) (*BlogUser, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func CreateUser(db *gorm.DB, user *BlogUser) (*BlogUser, error) {
 	tx := db.Create(user)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -42,8 +38,7 @@ func CreateUser(ctx *gin.Context, user *BlogUser) (*BlogUser, error) {
 	return user, nil
 }
 
-func GetUserById(ctx *gin.Context, id uint64) (*BlogUser, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetUserById(db *gorm.DB, id uint64) (*BlogUser, error) {
 	var user *BlogUser
 	tx := db.Where("id = ?", id).First(&user)
 	if tx.Error != nil {
@@ -51,16 +46,14 @@ func GetUserById(ctx *gin.Context, id uint64) (*BlogUser, error) {
 	}
 	return user, nil
 }
-func UpdateUser(ctx *gin.Context, user *BlogUser) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func UpdateUser(db *gorm.DB, user *BlogUser) (bool, error) {
 	tx := db.Model(user).Updates(user)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
 	return true, nil
 }
-func UpdatePassword(ctx *gin.Context, id uint64, password string) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func UpdatePassword(db *gorm.DB, id uint64, password string) (bool, error) {
 	tx := db.Model(&BlogUser{}).Where("id = ?", id).Update("password", password)
 	if tx.Error != nil {
 		return false, tx.Error
@@ -69,8 +62,7 @@ func UpdatePassword(ctx *gin.Context, id uint64, password string) (bool, error) 
 }
 
 // getUserList
-func GetUserList(ctx *gin.Context, current int, size int, nickname string, role int) ([]*BlogUser, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetUserList(db *gorm.DB, current int, size int, nickname string, role int) ([]*BlogUser, error) {
 	var users []*BlogUser
 	offset := (current - 1) * size
 	// 分页条件查询
@@ -86,8 +78,7 @@ func GetUserList(ctx *gin.Context, current int, size int, nickname string, role 
 	}
 	return users, nil
 }
-func GetUserCount(ctx *gin.Context, current int, size int, nickname string, role int) (int64, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetUserCount(db *gorm.DB, current int, size int, nickname string, role int) (int64, error) {
 	var count int64
 	// 分页条件查询
 	if len(nickname) != 0 {

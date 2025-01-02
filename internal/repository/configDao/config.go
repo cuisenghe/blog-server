@@ -1,9 +1,7 @@
 package configDao
 
 import (
-	"blog-server/constants"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -31,8 +29,7 @@ type Config struct {
 func (Config) TableName() string {
 	return "blog_config"
 }
-func GetConfig(ctx *gin.Context) (*Config, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetConfig(db *gorm.DB) (*Config, error) {
 	var config Config
 	// 查找最新的配置
 	tx := db.Order("createdAt desc").First(&config)

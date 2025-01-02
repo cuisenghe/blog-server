@@ -28,9 +28,7 @@ type Article struct {
 func (a Article) TableName() string {
 	return "blog_article"
 }
-func GetArticleList(ctx *gin.Context, current, size int) ([]*Article, error) {
-	//db
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetArticleList(db *gorm.DB, current, size int) ([]*Article, error) {
 	var articles []*Article
 	// 查询
 	offset := (current - 1) * size
@@ -40,8 +38,7 @@ func GetArticleList(ctx *gin.Context, current, size int) ([]*Article, error) {
 	}
 	return articles, nil
 }
-func GetSumCount(ctx *gin.Context) (int64, error) {
-	db := ctx.MustGet("db").(*gorm.DB)
+func GetSumCount(db *gorm.DB) (int64, error) {
 	var count int64
 	t := db.Model(&Article{}).Count(&count)
 	if t.Error != nil {
@@ -49,32 +46,28 @@ func GetSumCount(ctx *gin.Context) (int64, error) {
 	}
 	return count, nil
 }
-func CreateArticle(ctx *gin.Context, article *Article) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func CreateArticle(db *gorm.DB, article *Article) (*Article, error) {
 	tx := db.Create(&article)
 	if tx.Error != nil {
-		return false, tx.Error
+		return article, tx.Error
 	}
-	return true, nil
+	return article, nil
 }
-func DeleteArticle(ctx *gin.Context, id, status int) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func DeleteArticle(db *gorm.DB, id, status int) (bool, error) {
 	tx := db.Where("id = ?", id).Update("status", status)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
 	return true, nil
 }
-func RevertArticle(ctx *gin.Context, id int) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func RevertArticle(db *gorm.DB, id int) (bool, error) {
 	tx := db.Where("article_id = ?", id).Update("status", constants.ARTICLE_PUBLIC_STATUS)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
 	return true, nil
 }
-func GetArticleById(ctx *gin.Context, id int) (*Article, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetArticleById(db *gorm.DB, id int) (*Article, error) {
 	var article Article
 	tx := db.Where("id = ?", id).Find(&article)
 	if tx.Error != nil {
@@ -90,17 +83,15 @@ func UpdateArticleStatus(ctx *gin.Context, id int, status int) (bool, error) {
 	}
 	return true, nil
 }
-func UpdateArticleTop(ctx *gin.Context, id int, is_top int) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func UpdateArticleTop(db *gorm.DB, id int, is_top int) (bool, error) {
 	tx := db.Model(&Article{}).Where("id = ?", id).Update("is_top", is_top)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
 	return true, nil
 }
-func GetArticleListByCondition(ctx *gin.Context, current, size int, condition map[string]interface{}) ([]*Article, error) {
+func GetArticleListByCondition(db *gorm.DB, current, size int, condition map[string]interface{}) ([]*Article, error) {
 	//db
-	db := ctx.MustGet("db").(*gorm.DB)
 	var articles []*Article
 	// 查询
 	offset := (current - 1) * size
@@ -114,8 +105,7 @@ func GetArticleListByCondition(ctx *gin.Context, current, size int, condition ma
 	}
 	return articles, nil
 }
-func GetArticleListByContent(ctx *gin.Context, content string) ([]*Article, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetArticleListByContent(db *gorm.DB, content string) ([]*Article, error) {
 	var articles []*Article
 	tx := db.Where("article_content Like ?", content).
 		Where("status = ?", constants.ARTICLE_PUBLIC_STATUS).
@@ -125,8 +115,7 @@ func GetArticleListByContent(ctx *gin.Context, content string) ([]*Article, erro
 	}
 	return articles, nil
 }
-func GetArticleCountByContent(ctx *gin.Context, content string) (int64, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetArticleCountByContent(db *gorm.DB, content string) (int64, error) {
 	var count int64
 	tx := db.Model(&Article{}).Where("article_content Like ?", content).
 		Where("status = ?", constants.ARTICLE_PUBLIC_STATUS).

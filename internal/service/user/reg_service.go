@@ -21,8 +21,9 @@ type RegData struct {
 }
 
 func (s *service) Register(ctx *gin.Context, req *RegData) (uint64, error) {
+	db := GetDB(ctx)
 	// 先判断是否存在该用户
-	userInfo, err := userDao.GetUserByUsername(ctx, req.Username)
+	userInfo, err := userDao.GetUserByUsername(db, req.Username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -37,7 +38,7 @@ func (s *service) Register(ctx *gin.Context, req *RegData) (uint64, error) {
 		return 0, err
 	}
 
-	userInfo, err = userDao.CreateUser(ctx, &userDao.BlogUser{
+	userInfo, err = userDao.CreateUser(db, &userDao.BlogUser{
 		Username: req.Username,
 		Password: string(password),
 		Role:     constants.USER_ROLE,

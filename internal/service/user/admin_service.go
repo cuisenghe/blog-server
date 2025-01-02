@@ -16,7 +16,7 @@ type AdminUserInfoData struct {
 
 func (s *service) AdminUpdateUserInfo(ctx *gin.Context, data *AdminUserInfoData) (bool, error) {
 	// 查询
-	user, err := userDao.GetUserById(ctx, data.ID)
+	user, err := userDao.GetUserById(GetDB(ctx), data.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, err
 	}
@@ -26,7 +26,7 @@ func (s *service) AdminUpdateUserInfo(ctx *gin.Context, data *AdminUserInfoData)
 	// 更新
 	user.Avatar = data.Avatar
 	user.NickName = data.NickName
-	isSuccess, err := userDao.UpdateUser(ctx, user)
+	isSuccess, err := userDao.UpdateUser(GetDB(ctx), user)
 	if err != nil {
 		return false, err
 	}

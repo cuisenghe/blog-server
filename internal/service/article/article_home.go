@@ -71,11 +71,11 @@ func (s *service) GetArticleList(ctx *gin.Context, req *ArticleListData) (*Artic
 			Total:   0,
 		}, nil
 	}
-	list, err := articleDao.GetArticleList(ctx, req.Current, req.Size)
+	list, err := articleDao.GetArticleList(GetDB(ctx), req.Current, req.Size)
 	if err != nil {
 		return nil, err
 	}
-	count, err := articleDao.GetSumCount(ctx)
+	count, err := articleDao.GetSumCount(GetDB(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -91,11 +91,12 @@ func (s *service) GetArticleList(ctx *gin.Context, req *ArticleListData) (*Artic
 // BlogTimelineGetArticleList 获取时间线文章
 func (s *service) BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleListData) (*SimpleArticleListResp, error) {
 	// 获取文章
-	list, err := articleDao.GetArticleList(ctx, data.Current, data.Size)
+
+	list, err := articleDao.GetArticleList(GetDB(ctx), data.Current, data.Size)
 	if err != nil {
 		return nil, err
 	}
-	count, err := articleDao.GetSumCount(ctx)
+	count, err := articleDao.GetSumCount(GetDB(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func convertTimeLineData(list []*articleDao.Article) *SimpleArticleListResp {
 }
 func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) (*SimpleArticleListResp, error) {
 	// 根据条件查询文章
-	condition, err := articleDao.GetArticleListByCondition(ctx, req.Current, req.Size, map[string]interface{}{
+	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"tag_id": req.Id,
 	})
 	if err != nil {
@@ -148,7 +149,7 @@ func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) 
 	return convertTimeLineData(condition), nil
 }
 func (s *service) GetArticleListByCategoryId(ctx *gin.Context, req *ArticleListData) (*SimpleArticleListResp, error) {
-	condition, err := articleDao.GetArticleListByCondition(ctx, req.Current, req.Size, map[string]interface{}{
+	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"category_id": req.Id,
 	})
 	if err != nil {
@@ -165,7 +166,7 @@ func (s *service) GetRecommendArticleById(ctx *gin.Context, articleId int) (*Rec
 
 // 根据内容搜索
 func (s *service) GetArticleListByContent(ctx *gin.Context, content string) (*ContentArticleListResp, error) {
-	articleList, err := articleDao.GetArticleListByContent(ctx, content)
+	articleList, err := articleDao.GetArticleListByContent(GetDB(ctx), content)
 	if err != nil {
 		return &ContentArticleListResp{
 			Current: 0,
@@ -175,7 +176,7 @@ func (s *service) GetArticleListByContent(ctx *gin.Context, content string) (*Co
 		}, err
 	}
 	// 获取count
-	count, err := articleDao.GetArticleCountByContent(ctx, content)
+	count, err := articleDao.GetArticleCountByContent(GetDB(ctx), content)
 	return &ContentArticleListResp{
 		Current: 0,
 		Size:    0,
@@ -204,15 +205,16 @@ func (s *service) GetHotArticle(ctx *gin.Context) (*SimpleArticleListResp, error
 	return &SimpleArticleListResp{}, nil
 }
 func (s *service) GetArticleById(ctx *gin.Context, articleId int) (*DetailArticle, error) {
-	article, err := articleDao.GetArticleById(ctx, articleId)
+	db := GetDB(ctx)
+	article, err := articleDao.GetArticleById(db, articleId)
 	if err != nil {
 		return nil, err
 	}
 	var resp DetailArticle
 	resp.Article = article
 	// 获取tag
-	ids, err := tagDao.GetTagIdsByArticleId(ctx, articleId)
-	tags, err := tagDao.GetTagsById(ctx, ids)
+	ids, err := tagDao.GetTagIdsByArticleId(db, articleId)
+	tags, err := tagDao.GetTagsById(db, ids)
 	resp.TagIdList = ids
 	var tagNames []string
 	for _, tag := range tags {

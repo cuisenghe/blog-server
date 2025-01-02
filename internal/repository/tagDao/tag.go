@@ -1,8 +1,6 @@
 package tagDao
 
 import (
-	"blog-server/constants"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"time"
 )
@@ -17,8 +15,7 @@ type Tag struct {
 func (Tag) TableName() string {
 	return "blog_tag"
 }
-func getTagById(ctx *gin.Context, id int) (*Tag, error) {
-	db := ctx.MustGet("db").(*gorm.DB)
+func getTagById(db *gorm.DB, id int) (*Tag, error) {
 	var tag Tag
 	err := db.Where("id = ?", id).First(&tag).Error
 	if err != nil {
@@ -26,17 +23,15 @@ func getTagById(ctx *gin.Context, id int) (*Tag, error) {
 	}
 	return &tag, nil
 }
-func GetTagIdsByArticleId(ctx *gin.Context, id int) ([]int, error) {
+func GetTagIdsByArticleId(db *gorm.DB, id int) ([]int, error) {
 	var tagIds []int
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
 	tx := db.Where("article_id = ?", id).Find(&tagIds)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return tagIds, nil
 }
-func GetTagsById(ctx *gin.Context, tagId []int) ([]*Tag, error) {
-	db := ctx.MustGet("db").(*gorm.DB)
+func GetTagsById(db *gorm.DB, tagId []int) ([]*Tag, error) {
 	var tags []*Tag
 	tx := db.Where("id in (?)", tagId)
 	tx.Find(&tags)

@@ -1,7 +1,9 @@
 package category
 
 import (
+	"blog-server/constants"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Service interface {
@@ -12,4 +14,8 @@ type service struct {
 
 func NewService() Service {
 	return &service{}
+}
+
+func GetDB(ctx *gin.Context) *gorm.DB {
+	return ctx.MustGet(constants.DB).(*gorm.DB)
 }

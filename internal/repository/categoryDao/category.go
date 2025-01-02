@@ -1,8 +1,6 @@
 package categoryDao
 
 import (
-	"blog-server/constants"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -17,12 +15,33 @@ func (Category) TableName() string {
 	return "blog_category"
 }
 
-func GetCategory(ctx *gin.Context) ([]*Category, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+func GetCategory(db *gorm.DB) ([]*Category, error) {
 	var categories []*Category
 	tx := db.Find(&categories)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return categories, nil
+}
+func GetCategoryById(db *gorm.DB, id int) (*Category, error) {
+	var category Category
+	tx := db.Where("id = ?", id).Find(&category)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &category, nil
+}
+func CreateCategory(db *gorm.DB, category *Category) error {
+	tx := db.Create(category)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+func UpsertCategory(db *gorm.DB, category *Category) error {
+	tx := db.Save(category)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }

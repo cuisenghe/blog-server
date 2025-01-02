@@ -11,7 +11,7 @@ type SimpleCategory struct {
 }
 
 func (s *service) GetCategoryDict(ctx *gin.Context) ([]*SimpleCategory, error) {
-	category, err := categoryDao.GetCategory(ctx)
+	category, err := categoryDao.GetCategory(GetDB(ctx))
 	if err != nil {
 		return nil, err
 	}

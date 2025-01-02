@@ -2,6 +2,7 @@ package article
 
 import (
 	"blog-server/internal/api"
+	"blog-server/internal/repository/categoryDao"
 	"blog-server/internal/service/article"
 	"github.com/gin-gonic/gin"
 	"strconv"
@@ -77,7 +78,7 @@ func convertData(req *AddArticleReq) *article.AddArticleData {
 	}
 	return &article.AddArticleData{
 		ArticleTitle: req.ArticleTitle,
-		Category: &article.Category{
+		Category: &categoryDao.Category{
 			ID:           req.Category.ID,
 			CategoryName: req.Category.CategoryName,
 		},
