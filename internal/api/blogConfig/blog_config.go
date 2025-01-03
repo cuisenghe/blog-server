@@ -1,7 +1,7 @@
 package blogConfig
 
 import (
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/common/response"
 	"github.com/gin-gonic/gin"
 )

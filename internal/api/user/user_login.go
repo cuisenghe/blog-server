@@ -1,8 +1,8 @@
 package user
 
 import (
-	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/common/response"
 	"github.com/gin-gonic/gin"
 	"log"

@@ -1,7 +1,7 @@
 package category
 
 import (
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

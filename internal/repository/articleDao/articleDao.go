@@ -1,7 +1,7 @@
 package articleDao
 
 import (
-	"blog-server/constants"
+	constants2 "blog-server/internal/common/constants"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"time"
@@ -61,7 +61,7 @@ func DeleteArticle(db *gorm.DB, id, status int) (bool, error) {
 	return true, nil
 }
 func RevertArticle(db *gorm.DB, id int) (bool, error) {
-	tx := db.Where("article_id = ?", id).Update("status", constants.ARTICLE_PUBLIC_STATUS)
+	tx := db.Where("article_id = ?", id).Update("status", constants2.ARTICLE_PUBLIC_STATUS)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
@@ -76,7 +76,7 @@ func GetArticleById(db *gorm.DB, id int) (*Article, error) {
 	return &article, nil
 }
 func UpdateArticleStatus(ctx *gin.Context, id int, status int) (bool, error) {
-	db := ctx.MustGet(constants.DB).(*gorm.DB)
+	db := ctx.MustGet(constants2.DB).(*gorm.DB)
 	tx := db.Model(&Article{}).Where("id = ?", id).Update("status", status)
 	if tx.Error != nil {
 		return false, tx.Error
@@ -108,7 +108,7 @@ func GetArticleListByCondition(db *gorm.DB, current, size int, condition map[str
 func GetArticleListByContent(db *gorm.DB, content string) ([]*Article, error) {
 	var articles []*Article
 	tx := db.Where("article_content Like ?", content).
-		Where("status = ?", constants.ARTICLE_PUBLIC_STATUS).
+		Where("status = ?", constants2.ARTICLE_PUBLIC_STATUS).
 		Order("view_times desc").Find(&articles)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -118,7 +118,7 @@ func GetArticleListByContent(db *gorm.DB, content string) ([]*Article, error) {
 func GetArticleCountByContent(db *gorm.DB, content string) (int, error) {
 	var count int64
 	tx := db.Model(&Article{}).Where("article_content Like ?", content).
-		Where("status = ?", constants.ARTICLE_PUBLIC_STATUS).
+		Where("status = ?", constants2.ARTICLE_PUBLIC_STATUS).
 		Count(&count)
 	if tx.Error != nil {
 		return 0, tx.Error

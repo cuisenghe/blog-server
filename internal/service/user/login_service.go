@@ -1,7 +1,7 @@
 package user
 
 import (
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/repository/userDao"
 	"blog-server/pkg/authToken"
 	bizErr "blog-server/pkg/errors"

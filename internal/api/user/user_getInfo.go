@@ -1,7 +1,7 @@
 package user
 
 import (
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/common/response"
 	"blog-server/internal/repository/userDao"
 

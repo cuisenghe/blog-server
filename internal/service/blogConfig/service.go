@@ -1,7 +1,7 @@
 package blogConfig
 
 import (
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/repository/configDao"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

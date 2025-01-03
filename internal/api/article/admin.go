@@ -1,8 +1,8 @@
 package article
 
 import (
-	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/constants"
 	"blog-server/internal/common/response"
 	"blog-server/internal/repository/categoryDao"
 	"blog-server/internal/service/article"

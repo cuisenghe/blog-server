@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"blog-server/configs"
-	"blog-server/constants"
+	"blog-server/internal/common/constants"
 
 	"fmt"
 

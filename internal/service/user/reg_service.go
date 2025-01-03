@@ -1,7 +1,7 @@
 package user
 
 import (
-	"blog-server/constants"
+	constants2 "blog-server/internal/common/constants"
 	"blog-server/internal/repository/userDao"
 	bizErr "blog-server/pkg/errors"
 	"errors"
@@ -30,7 +30,7 @@ func (s *service) Register(ctx *gin.Context, req *RegData) (uint64, error) {
 
 	if userInfo != nil {
 		// 存在该用户，返回用户已经注册
-		return 0, bizErr.NewBizError(constants.USER_REGISTERED, "用户已经注册")
+		return 0, bizErr.NewBizError(constants2.USER_REGISTERED, "用户已经注册")
 	}
 	// 如果不存在该用户，则进行注册
 	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -41,7 +41,7 @@ func (s *service) Register(ctx *gin.Context, req *RegData) (uint64, error) {
 	userInfo, err = userDao.CreateUser(db, &userDao.BlogUser{
 		Username: req.Username,
 		Password: string(password),
-		Role:     constants.USER_ROLE,
+		Role:     constants2.USER_ROLE,
 		NickName: req.NickName,
 		Avatar:   req.Avatar,
 		QQ:       req.QQ,
