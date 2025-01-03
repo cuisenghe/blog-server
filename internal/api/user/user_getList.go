@@ -3,6 +3,7 @@ package user
 import (
 	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/service/user"
 	"github.com/gin-gonic/gin"
 )
@@ -19,14 +20,14 @@ func (h *Handler) GetUserList(ctx *gin.Context) {
 	var req GetListRequest
 	api.Binding(ctx, &req)
 	// service
-	list, err := h.service.GetUserList(ctx, &user.GetUserListData{
+	resp, err := h.service.GetUserList(ctx, &user.GetUserListData{
 		Current:  req.Current,
 		Size:     req.Size,
 		NickName: req.NickName,
 		Role:     req.Role,
 	})
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.BIZ_ERR, constants.FAIL_MSG)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccessWithPage(ctx, list.Size, list.Current, list.List, list.Total)
+	response.SuccessWithPage(ctx, resp)
 }

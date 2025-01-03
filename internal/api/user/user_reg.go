@@ -1,7 +1,9 @@
 package user
 
 import (
+	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/service/user"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -36,13 +38,13 @@ func (h *Handler) Register(ctx *gin.Context) {
 	})
 	if err != nil {
 		log.Println("register err:", err)
-		api.ReturnBizErrorWithData(ctx, err, &RegisterResponse{
+		response.FailWithData(ctx, constants.FAIL, err.Error(), &RegisterResponse{
 			ID:       0,
 			Username: req.Username,
 		})
 		return
 	}
-	api.ReturnSuccess(ctx, &RegisterResponse{
+	response.Success(ctx, &RegisterResponse{
 		ID:       id,
 		Username: req.Username,
 	})

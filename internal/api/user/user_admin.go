@@ -1,7 +1,9 @@
 package user
 
 import (
+	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/service/user"
 	"github.com/gin-gonic/gin"
 )
@@ -33,13 +35,13 @@ func (h *Handler) UpdateUserInfo(ctx *gin.Context) {
 	})
 	if err != nil {
 		// 返回错误
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, updateInfo)
+	response.Success(ctx, updateInfo)
 }
 
 // 修改用户角色
 func (h *Handler) UpdateUserRole(ctx *gin.Context) {
 	// binding
-	
+
 }

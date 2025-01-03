@@ -78,7 +78,7 @@ func GetUserList(db *gorm.DB, current int, size int, nickname string, role int) 
 	}
 	return users, nil
 }
-func GetUserCount(db *gorm.DB, current int, size int, nickname string, role int) (int64, error) {
+func GetUserCount(db *gorm.DB, current int, size int, nickname string, role int) (int, error) {
 	var count int64
 	// 分页条件查询
 	if len(nickname) != 0 {
@@ -92,5 +92,5 @@ func GetUserCount(db *gorm.DB, current int, size int, nickname string, role int)
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
-	return count, nil
+	return int(count), nil
 }

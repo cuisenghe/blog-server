@@ -2,6 +2,7 @@ package user
 
 import (
 	"blog-server/constants"
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/userDao"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ type Service interface {
 	UpdateUserInfo(ctx *gin.Context, user *userDao.BlogUser) (bool, error)
 
 	UpdatePassword(ctx *gin.Context, data *UserPasswordData) (bool, error)
-	GetUserList(ctx *gin.Context, data *GetUserListData) (*GetUserListResp, error)
+	GetUserList(ctx *gin.Context, data *GetUserListData) (*response.PageListResponse, error)
 
 	AdminUpdateUserInfo(ctx *gin.Context, data *AdminUserInfoData) (bool, error)
 }

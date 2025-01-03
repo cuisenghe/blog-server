@@ -1,6 +1,7 @@
 package article
 
 import (
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/articleDao"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -53,20 +54,22 @@ func (s *service) UpdateArticleTop(ctx *gin.Context, id, is_top int) (bool, erro
 	}
 	return article, nil
 }
-func (s *service) AdminGetArticleList(ctx *gin.Context, data *ArticleListData) (*ArticleListResp, error) {
+func (s *service) AdminGetArticleList(ctx *gin.Context, data *ArticleListData) (*response.PageListResponse, error) {
 	// 管理员获取文章列表
+	resp := &response.PageListResponse{
+		Current: data.Current,
+		Size:    data.Size,
+	}
+
 	list, err := articleDao.GetArticleList(GetDB(ctx), data.Current, data.Size)
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	count, err := articleDao.GetSumCount(GetDB(ctx))
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
-	return &ArticleListResp{
-		Current: data.Current,
-		Size:    data.Size,
-		List:    list,
-		Total:   count,
-	}, nil
+	resp.List = list
+	resp.Total = count
+	return resp, nil
 }

@@ -3,6 +3,7 @@ package article
 import (
 	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/service/article"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -22,12 +23,12 @@ func (h *Handler) GetArticleList(ctx *gin.Context) {
 	// binding
 	size, err := strconv.Atoi(ctx.Param("size"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
 	current, err := strconv.Atoi(ctx.Param("current"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
 	// service
@@ -36,10 +37,10 @@ func (h *Handler) GetArticleList(ctx *gin.Context) {
 		Current: current,
 	})
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取失败")
 		return
 	}
-	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Current, resp.List, resp.Total)
+	response.SuccessWithPage(ctx, resp)
 }
 
 // 获取文章时间轴
@@ -47,11 +48,11 @@ func (h *Handler) BlogTimelineGetArticleList(ctx *gin.Context) {
 	//
 	current, err := strconv.Atoi(ctx.Param("current"))
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.PARAMETER_PARSING_ERROR, constants.PARAMETER_PARSING_ERROR_MSG)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	size, err := strconv.Atoi(ctx.Param("size"))
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.PARAMETER_PARSING_ERROR, constants.PARAMETER_PARSING_ERROR_MSG)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	// service
 	resp, err := h.service.BlogTimelineGetArticleList(ctx, &article.ArticleListData{
@@ -60,10 +61,11 @@ func (h *Handler) BlogTimelineGetArticleList(ctx *gin.Context) {
 	})
 	if err != nil {
 		slog.Error("获取时间线失败：", err.Error())
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
 
-	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Current, resp.List, resp.Total)
+	response.SuccessWithPage(ctx, resp)
 }
 func (h *Handler) GetArticleListByTagId(ctx *gin.Context) {
 	// 获取简略信息
@@ -76,9 +78,9 @@ func (h *Handler) GetArticleListByTagId(ctx *gin.Context) {
 		Id:      req.Id,
 	})
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.PARAMETER_PARSING_ERROR, err.Error())
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccessWithPage(ctx, resp.Current, resp.Size, resp.List, resp.Total)
+	response.SuccessWithPage(ctx, resp)
 }
 func (h *Handler) GetArticleListByCategoryId(ctx *gin.Context) {
 	var req ListArticleReq
@@ -90,9 +92,9 @@ func (h *Handler) GetArticleListByCategoryId(ctx *gin.Context) {
 		Id:      req.Id,
 	})
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.PARAMETER_PARSING_ERROR, err.Error())
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Current, resp.List, resp.Total)
+	response.SuccessWithPage(ctx, resp)
 }
 func (h *Handler) GetRecommendArticleById(ctx *gin.Context) {
 	article_id := ctx.Param("article_id")
@@ -102,9 +104,9 @@ func (h *Handler) GetArticleListByContent(ctx *gin.Context) {
 	content := ctx.Param("content")
 	resp, err := h.service.GetArticleListByContent(ctx, content)
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.FAIL, err.Error())
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccessWithPage(ctx, resp.Size, resp.Size, resp.List, resp.Total)
+	response.SuccessWithPage(ctx, resp)
 }
 func (h *Handler) GetHotArticle(ctx *gin.Context) {
 
@@ -117,8 +119,8 @@ func (h *Handler) GetArticleById(ctx *gin.Context) {
 	}
 	resp, err := h.service.GetArticleById(ctx, id)
 	if err != nil {
-		api.ReturnFailWithPage(ctx, constants.FAIL, err.Error())
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
-	api.ReturnSuccess(ctx, resp)
+	response.Success(ctx, resp)
 }

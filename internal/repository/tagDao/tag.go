@@ -40,3 +40,28 @@ func GetTagsById(db *gorm.DB, tagId []int) ([]*Tag, error) {
 	}
 	return tags, nil
 }
+func BatchGetTags(db *gorm.DB, tagIds []int) ([]*Tag, error) {
+	var tags []*Tag
+	tx := db.Where("id in (?)", tagIds)
+	tx.Find(&tags)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return tags, nil
+}
+func GetTagListByCondition(db *gorm.DB, condition map[string]string) ([]*Tag, error) {
+	var tags []*Tag
+	tx := db.Where(condition).Find(&tags)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return tags, nil
+}
+func GetCountByCondition(db *gorm.DB, condition map[string]string) (int, error) {
+	var count int64
+	tx := db.Where(condition).Count(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	return int(count), nil
+}

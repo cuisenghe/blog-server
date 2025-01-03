@@ -1,7 +1,9 @@
 package user
 
 import (
+	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/userDao"
 	"blog-server/internal/service/user"
 	"github.com/gin-gonic/gin"
@@ -32,9 +34,9 @@ func (h *Handler) UpdateOwnUserInfo(ctx *gin.Context) {
 		QQ:       req.QQ,
 	})
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, info)
+	response.Success(ctx, info)
 }
 
 // 更改用户密码
@@ -50,8 +52,8 @@ func (h *Handler) UpdatePassword(ctx *gin.Context) {
 		Password2: req.Password2,
 	})
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
-	api.ReturnSuccess(ctx, isSuccess)
+	response.Success(ctx, isSuccess)
 }

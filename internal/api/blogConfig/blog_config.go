@@ -1,14 +1,15 @@
 package blogConfig
 
 import (
-	"blog-server/internal/api"
+	"blog-server/constants"
+	"blog-server/internal/common/response"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) GetConfig(ctx *gin.Context) {
 	config, err := h.service.GetConfig(ctx)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, config)
+	response.Success(ctx, config)
 }

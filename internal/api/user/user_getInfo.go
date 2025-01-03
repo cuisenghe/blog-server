@@ -1,7 +1,8 @@
 package user
 
 import (
-	"blog-server/internal/api"
+	"blog-server/constants"
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/userDao"
 
 	"github.com/gin-gonic/gin"
@@ -23,12 +24,14 @@ func (h *Handler) GetUserInfoById(ctx *gin.Context) {
 	// string 转int64
 	parseUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 		return
 	}
 	// 查询
 	user, err := h.service.GetUserInfoById(ctx, parseUint)
-	api.ReturnSuccess(ctx, gin.H{"user": convert(user)})
+	response.Success(ctx, map[string]interface{}{
+		"user": convert(user),
+	})
 }
 func convert(user *userDao.BlogUser) *UserInfoResp {
 	return &UserInfoResp{

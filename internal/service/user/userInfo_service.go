@@ -2,6 +2,7 @@ package user
 
 import (
 	"blog-server/constants"
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/userDao"
 	bizErr "blog-server/pkg/errors"
 
@@ -85,14 +86,20 @@ func (s *service) UpdatePassword(ctx *gin.Context, data *UserPasswordData) (bool
 }
 
 // 分页获取数据
-func (s *service) GetUserList(ctx *gin.Context, data *GetUserListData) (*GetUserListResp, error) {
+func (s *service) GetUserList(ctx *gin.Context, data *GetUserListData) (*response.PageListResponse, error) {
 	// 获取数据
+	resp := &response.PageListResponse{
+		List:    nil,
+		Current: data.Current,
+		Size:    data.Size,
+		Total:   0,
+	}
 	list, err := userDao.GetUserList(GetDB(ctx), data.Current, data.Size, data.NickName, data.Role)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+		return resp, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &GetUserListResp{}, nil
+		return resp, nil
 	}
 	// 获取数量
 	count, err := userDao.GetUserCount(GetDB(ctx), data.Current, data.Size, data.NickName, data.Role)
@@ -100,17 +107,9 @@ func (s *service) GetUserList(ctx *gin.Context, data *GetUserListData) (*GetUser
 		return nil, err
 	}
 	if count == 0 {
-		return &GetUserListResp{
-			List:    nil,
-			Current: data.Current,
-			Size:    data.Size,
-			Total:   0,
-		}, nil
+		return resp, nil
 	}
-	return &GetUserListResp{
-		List:    list,
-		Current: data.Current,
-		Size:    data.Size,
-		Total:   count,
-	}, nil
+	resp.List = list
+	resp.Total = count
+	return resp, nil
 }

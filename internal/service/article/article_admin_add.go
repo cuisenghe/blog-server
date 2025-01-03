@@ -4,6 +4,7 @@ import (
 	"blog-server/internal/repository/ArticleTagDao"
 	"blog-server/internal/repository/articleDao"
 	"blog-server/internal/repository/categoryDao"
+	"blog-server/internal/repository/tagDao"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -44,21 +45,38 @@ func (s *service) AddArticle(ctx *gin.Context, data *AddArticleData) (bool, erro
 	tx := GetDB(ctx).Begin()
 	article, err := articleDao.CreateArticle(tx, convertData(data))
 	if err != nil {
+		tx.Rollback()
 		return false, err
 	}
 	// 判断目录是否存在，不存在就创建
-	_, err = categoryDao.GetCategoryById(GetDB(ctx), data.Category.ID)
+	_, err = categoryDao.GetCategoryById(tx, data.Category.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		tx.Rollback()
 		return false, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// 创建目录
-		err := categoryDao.CreateCategory(GetDB(ctx), data.Category)
+		err := categoryDao.CreateCategory(tx, data.Category)
 		if err != nil {
+			tx.Rollback()
 			return false, err
 		}
 	}
 	// todo 创建tag
+	// 批量查询
+	var tagList []int
+	for _, tag := range data.TagList {
+		tagList = append(tagList, tag.ID)
+	}
+	tags, err := tagDao.BatchGetTags(tx, tagList)
+	if err != nil {
+		tx.Rollback()
+		return false, err
+	}
+	if len(tags) != len(data.TagList) {
+		tx.Rollback()
+		return false, err
+	}
 	var articleTags []*ArticleTagDao.ArticleTag
 	for _, tag := range data.TagList {
 		articleTags = append(articleTags, &ArticleTagDao.ArticleTag{
@@ -66,12 +84,11 @@ func (s *service) AddArticle(ctx *gin.Context, data *AddArticleData) (bool, erro
 			ArticleId: article.ID,
 		})
 	}
-	err = ArticleTagDao.BatchCreateArticleTag(GetDB(ctx), articleTags)
+	err = ArticleTagDao.BatchCreateArticleTag(tx, articleTags)
 	if err != nil {
+		tx.Rollback()
 		return false, err
 	}
-	// todo 创建category
-
 	return true, nil
 }
 func convertData(data *AddArticleData) *articleDao.Article {

@@ -97,6 +97,7 @@ func initHandler(r *gin.Engine) {
 	{
 		handler := tag.NewHandler()
 		tagGroup.GET("/getTagDictionary", handler.GetTagDictionary)
+		tagGroup.POST("/getTagList", handler.GetTagList)
 	}
 	likeGroup := r.Group("/like")
 	{

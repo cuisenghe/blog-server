@@ -1,7 +1,9 @@
 package article
 
 import (
+	"blog-server/constants"
 	"blog-server/internal/api"
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/categoryDao"
 	"blog-server/internal/service/article"
 	"github.com/gin-gonic/gin"
@@ -50,9 +52,9 @@ func (h *Handler) AddArticle(ctx *gin.Context) {
 	// 新增
 	addArticle, err := h.service.AddArticle(ctx, convertData(&req))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.FailWithBizError(ctx, err)
 	}
-	api.ReturnSuccess(ctx, addArticle)
+	response.Success(ctx, addArticle)
 }
 func convertData(req *AddArticleReq) *article.AddArticleData {
 	// 封装tag
@@ -101,9 +103,9 @@ func (h *Handler) UpdateArticle(ctx *gin.Context) {
 	api.Binding(ctx, &req)
 	updateArticle, err := h.service.UpdateArticle(ctx, convertData(&req))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, 1, "获取错误")
 	}
-	api.ReturnSuccess(ctx, updateArticle)
+	response.Success(ctx, updateArticle)
 }
 
 // DeleteArticle 根据状态删除文章
@@ -111,32 +113,32 @@ func (h *Handler) DeleteArticle(ctx *gin.Context) {
 	// binding
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取错误")
 	}
 	status, err := strconv.Atoi(ctx.Param("status"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取错误")
 	}
 
 	// service
 	deleteArticle, err := h.service.DeleteArticle(ctx, id, status)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取错误")
 	}
-	api.ReturnSuccess(ctx, deleteArticle)
+	response.Success(ctx, deleteArticle)
 }
 
 // RevertArticle 恢复文章
 func (h *Handler) RevertArticle(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取错误")
 	}
 	revertArticle, err := h.service.RevertArticle(ctx, id)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "获取错误")
 	}
-	api.ReturnSuccess(ctx, revertArticle)
+	response.Success(ctx, revertArticle)
 }
 
 // TitleExist 判断文章是否存在
@@ -146,44 +148,44 @@ func (h *Handler) TitleExist(ctx *gin.Context) {
 	// service
 	exist, err := h.service.TitleExist(ctx, req.ID)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, "判断文章错误")
 	}
-	api.ReturnSuccess(ctx, exist)
+	response.Success(ctx, exist)
 }
 
 // IsPublic 切换文章私密性
 func (h *Handler) IsPublic(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	status, err := strconv.Atoi(ctx.Param("status"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	articleStatus, err := h.service.UpdateArticleStatus(ctx, id, status)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, articleStatus)
+	response.Success(ctx, articleStatus)
 }
 
 // UpdateTop 更改置顶
 func (h *Handler) UpdateTop(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	is_top, err := strconv.Atoi(ctx.Param("is_top"))
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
 	// Service
 	top, err := h.service.UpdateArticleTop(ctx, id, is_top)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, top)
+	response.Success(ctx, top)
 }
 
 // AdminGetArticleList 后台获取文章的列表
@@ -191,12 +193,12 @@ func (h *Handler) AdminGetArticleList(ctx *gin.Context) {
 	var req *ListArticleReq
 	api.Binding(ctx, &req)
 	// Service
-	list, err := h.service.AdminGetArticleList(ctx, &article.ArticleListData{
+	resp, err := h.service.AdminGetArticleList(ctx, &article.ArticleListData{
 		Current: req.Current,
 		Size:    req.Size,
 	})
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccessWithPage(ctx, list.Size, list.Current, list.List, list.Total)
+	response.Success(ctx, resp)
 }

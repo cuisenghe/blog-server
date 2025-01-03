@@ -1,14 +1,15 @@
 package category
 
 import (
-	"blog-server/internal/api"
+	"blog-server/constants"
+	"blog-server/internal/common/response"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) GetCategoryDictionary(ctx *gin.Context) {
 	dict, err := h.service.GetCategoryDict(ctx)
 	if err != nil {
-		api.ReturnBizError(ctx, err)
+		response.Fail(ctx, constants.FAIL, err.Error())
 	}
-	api.ReturnSuccess(ctx, dict)
+	response.Success(ctx, dict)
 }

@@ -1,6 +1,7 @@
 package article
 
 import (
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/articleDao"
 	"blog-server/internal/repository/tagDao"
 	"github.com/gin-gonic/gin"
@@ -14,18 +15,13 @@ type ArticleListData struct {
 	Content string `form:"content"`
 	Id      int    `form:"id"`
 }
-type ArticleListResp struct {
-	Current int                   `json:"current"`
-	Size    int                   `json:"size"`
-	List    []*articleDao.Article `json:"list"`
-	Total   int64                 `json:"total"`
-}
-type SimpleArticleListResp struct {
-	Current int                  `json:"current"`
-	Size    int                  `json:"size"`
-	List    []*SimpleArticleList `json:"list"`
-	Total   int64                `json:"total"`
-}
+
+//	type SimpleArticleListResp struct {
+//		Current int                  `json:"current"`
+//		Size    int                  `json:"size"`
+//		List    []*SimpleArticleList `json:"list"`
+//		Total   int64                `json:"total"`
+//	}
 type SimpleArticleList struct {
 	Year        string           `json:"year"`
 	ArticleList []*SimpleArticle `json:"articleList"`
@@ -36,21 +32,9 @@ type SimpleArticle struct {
 	ArticleCover string    `json:"article_cover"`
 	CreatedAt    time.Time `json:"createdAt"`
 }
-type RecommendArticleListResp struct {
-	Current int                   `json:"current"`
-	Size    int                   `json:"size"`
-	List    *RecommendArticleList `json:"list"`
-	Total   int64                 `json:"total"`
-}
 type RecommendArticleList struct {
 	Year        string           `json:"year"`
 	ArticleList []*SimpleArticle `json:"articleList"`
-}
-type ContentArticleListResp struct {
-	Current int                 `json:"current"`
-	Size    int                 `json:"size"`
-	List    *ContentArticleList `json:"list"`
-	Total   int64               `json:"total"`
 }
 type ContentArticleList struct {
 	Year        string           `json:"year"`
@@ -62,36 +46,35 @@ type DetailArticle struct {
 	TagNameList []string `json:"tagNameList"`
 }
 
-func (s *service) GetArticleList(ctx *gin.Context, req *ArticleListData) (*ArticleListResp, error) {
+func (s *service) GetArticleList(ctx *gin.Context, req *ArticleListData) (*response.PageListResponse, error) {
+	resp := &response.PageListResponse{
+		Current: req.Current,
+		Size:    req.Size,
+	}
 	if req.Size == 0 {
-		return &ArticleListResp{
-			Current: 0,
-			Size:    0,
-			List:    nil,
-			Total:   0,
-		}, nil
+		return resp, nil
 	}
 	list, err := articleDao.GetArticleList(GetDB(ctx), req.Current, req.Size)
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	count, err := articleDao.GetSumCount(GetDB(ctx))
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 
-	return &ArticleListResp{
-		Current: req.Current,
-		Size:    req.Size,
-		List:    list,
-		Total:   count,
-	}, nil
+	resp.List = list
+	resp.Total = count
+	return resp, nil
 }
 
 // BlogTimelineGetArticleList 获取时间线文章
-func (s *service) BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleListData) (*SimpleArticleListResp, error) {
+func (s *service) BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleListData) (*response.PageListResponse, error) {
 	// 获取文章
-
+	resp := &response.PageListResponse{
+		Current: data.Current,
+		Size:    data.Size,
+	}
 	list, err := articleDao.GetArticleList(GetDB(ctx), data.Current, data.Size)
 	if err != nil {
 		return nil, err
@@ -100,15 +83,12 @@ func (s *service) BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleList
 	if err != nil {
 		return nil, err
 	}
-	resp := convertTimeLineData(list)
-	resp.Size = data.Size
+	resp.List = convertTimeLineData(list)
 	resp.Total = count
-	resp.Current = data.Current
 	return resp, nil
 }
-func convertTimeLineData(list []*articleDao.Article) *SimpleArticleListResp {
+func convertTimeLineData(list []*articleDao.Article) []*SimpleArticleList {
 	// 分组
-	var resp SimpleArticleListResp
 	simpleList := make([]*SimpleArticleList, 0)
 	m := make(map[string]*SimpleArticleList)
 	for _, article := range list {
@@ -133,56 +113,62 @@ func convertTimeLineData(list []*articleDao.Article) *SimpleArticleListResp {
 	for _, v := range m {
 		simpleList = append(simpleList, v)
 	}
-	resp.List = simpleList
-	// return
-	return &resp
-
+	return simpleList
 }
-func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) (*SimpleArticleListResp, error) {
+func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) (*response.PageListResponse, error) {
 	// 根据条件查询文章
+	resp := &response.PageListResponse{
+		Current: req.Current,
+		Size:    req.Size,
+	}
 	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"tag_id": req.Id,
 	})
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
-	return convertTimeLineData(condition), nil
+	resp.List = convertTimeLineData(condition)
+	return resp, nil
 }
-func (s *service) GetArticleListByCategoryId(ctx *gin.Context, req *ArticleListData) (*SimpleArticleListResp, error) {
+func (s *service) GetArticleListByCategoryId(ctx *gin.Context, req *ArticleListData) (*response.PageListResponse, error) {
+	resp := &response.PageListResponse{
+		Current: req.Current,
+		Size:    req.Size,
+	}
 	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"category_id": req.Id,
 	})
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
-	return convertTimeLineData(condition), nil
+	resp.List = convertTimeLineData(condition)
+	return resp, nil
 }
 
 // 获取推荐
-func (s *service) GetRecommendArticleById(ctx *gin.Context, articleId int) (*RecommendArticleListResp, error) {
+func (s *service) GetRecommendArticleById(ctx *gin.Context, articleId int) (*response.PageListResponse, error) {
 	// 获取推荐
-	return &RecommendArticleListResp{}, nil
+	return &response.PageListResponse{}, nil
 }
 
 // 根据内容搜索
-func (s *service) GetArticleListByContent(ctx *gin.Context, content string) (*ContentArticleListResp, error) {
+func (s *service) GetArticleListByContent(ctx *gin.Context, content string) (*response.PageListResponse, error) {
+	resp := &response.PageListResponse{
+		Current: 1,
+		Size:    5,
+	}
 	articleList, err := articleDao.GetArticleListByContent(GetDB(ctx), content)
 	if err != nil {
-		return &ContentArticleListResp{
-			Current: 0,
-			Size:    0,
-			List:    nil,
-			Total:   0,
-		}, err
+		return resp, err
 	}
 	// 获取count
 	count, err := articleDao.GetArticleCountByContent(GetDB(ctx), content)
-	return &ContentArticleListResp{
-		Current: 0,
-		Size:    0,
-		List:    convertSearchData(articleList),
-		Total:   count,
-	}, nil
+	if err != nil {
+		return resp, err
+	}
+	resp.List = convertSearchData(articleList)
+	resp.Total = count
+	return resp, nil
 }
 func convertSearchData(list []*articleDao.Article) *ContentArticleList {
 	articles := make([]*SimpleArticle, 0, len(list))
@@ -200,9 +186,9 @@ func convertSearchData(list []*articleDao.Article) *ContentArticleList {
 		ArticleList: articles,
 	}
 }
-func (s *service) GetHotArticle(ctx *gin.Context) (*SimpleArticleListResp, error) {
+func (s *service) GetHotArticle(ctx *gin.Context) (*response.PageListResponse, error) {
 
-	return &SimpleArticleListResp{}, nil
+	return &response.PageListResponse{}, nil
 }
 func (s *service) GetArticleById(ctx *gin.Context, articleId int) (*DetailArticle, error) {
 	db := GetDB(ctx)

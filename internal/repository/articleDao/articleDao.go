@@ -38,13 +38,13 @@ func GetArticleList(db *gorm.DB, current, size int) ([]*Article, error) {
 	}
 	return articles, nil
 }
-func GetSumCount(db *gorm.DB) (int64, error) {
+func GetSumCount(db *gorm.DB) (int, error) {
 	var count int64
 	t := db.Model(&Article{}).Count(&count)
 	if t.Error != nil {
 		return 0, t.Error
 	}
-	return count, nil
+	return int(count), nil
 }
 func CreateArticle(db *gorm.DB, article *Article) (*Article, error) {
 	tx := db.Create(&article)
@@ -115,7 +115,7 @@ func GetArticleListByContent(db *gorm.DB, content string) ([]*Article, error) {
 	}
 	return articles, nil
 }
-func GetArticleCountByContent(db *gorm.DB, content string) (int64, error) {
+func GetArticleCountByContent(db *gorm.DB, content string) (int, error) {
 	var count int64
 	tx := db.Model(&Article{}).Where("article_content Like ?", content).
 		Where("status = ?", constants.ARTICLE_PUBLIC_STATUS).
@@ -123,5 +123,5 @@ func GetArticleCountByContent(db *gorm.DB, content string) (int64, error) {
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
-	return count, nil
+	return int(count), nil
 }
