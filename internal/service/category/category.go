@@ -1,6 +1,7 @@
 package category
 
 import (
+	"blog-server/internal/common/response"
 	"blog-server/internal/repository/categoryDao"
 	"github.com/gin-gonic/gin"
 )
@@ -26,4 +27,31 @@ func convertData(data []*categoryDao.Category) []*SimpleCategory {
 		})
 	}
 	return result
+}
+func (s *service) GetCategoryList(ctx *gin.Context, tagName string) (*response.PageListResponse, error) {
+	// dao
+	var resp response.PageListResponse
+	categorys, err := categoryDao.GetCategoryListByCondition(GetDB(ctx), tagName)
+	if err != nil {
+		return &resp, err
+	}
+	count, err := categoryDao.GetCategoryCountByCondition(GetDB(ctx), tagName)
+	if err != nil {
+		return &resp, err
+	}
+	resp.List = convertData(categorys)
+	resp.Total = count
+	return &resp, nil
+}
+func (s *service) AddCategory(ctx *gin.Context, tagName string) (*SimpleCategory, error) {
+	var category categoryDao.Category
+	category.CategoryName = tagName
+	err := categoryDao.CreateCategory(GetDB(ctx), &category)
+	if err != nil {
+		return nil, err
+	}
+	return &SimpleCategory{
+		ID:           category.ID,
+		CategoryName: category.CategoryName,
+	}, nil
 }

@@ -2,7 +2,9 @@ package article
 
 import (
 	"blog-server/internal/common/response"
+	"blog-server/internal/repository/ArticleTagDao"
 	"blog-server/internal/repository/articleDao"
+	"blog-server/internal/repository/tagDao"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -54,22 +56,109 @@ func (s *service) UpdateArticleTop(ctx *gin.Context, id, is_top int) (bool, erro
 	}
 	return article, nil
 }
-func (s *service) AdminGetArticleList(ctx *gin.Context, data *ArticleListData) (*response.PageListResponse, error) {
+
+type AdminArticle struct {
+	articleDao.Article
+	TagNameList []string `json:"tagNameList"`
+}
+type AdminArticleListData struct {
+	Size         int      `json:"size"`
+	Current      int      `json:"current"`
+	ArticleTitle string   `json:"article_title"`
+	CategoryId   int      `json:"category_id"`
+	CreateTime   []string `json:"create_time"`
+	IsTop        int      `json:"is_top"`
+	Status       int      `json:"status"`
+	TagId        int      `json:"tag_id"`
+}
+
+func (s *service) AdminGetArticleList(ctx *gin.Context, data *AdminArticleListData) (*response.PageListResponse, error) {
 	// 管理员获取文章列表
 	resp := &response.PageListResponse{
 		Current: data.Current,
 		Size:    data.Size,
 	}
-
-	list, err := articleDao.GetArticleList(GetDB(ctx), data.Current, data.Size)
+	// 判断condition是否存在
+	var gtCondition map[string]interface{}
+	var ltCondition map[string]interface{}
+	if len(data.CreateTime) != 0 {
+		gtCondition["createdAt"] = data.CreateTime[0]
+		ltCondition["createdAt"] = data.CreateTime[1]
+	}
+	list, err := articleDao.GetArticleListByCondition(GetDB(ctx), data.Current, data.Size, getEqCondition(data), gtCondition, ltCondition)
 	if err != nil {
 		return resp, err
 	}
-	count, err := articleDao.GetSumCount(GetDB(ctx))
+	count, err := articleDao.GetArticleCountByCondition(GetDB(ctx), getEqCondition(data), gtCondition, ltCondition)
 	if err != nil {
 		return resp, err
 	}
-	resp.List = list
+	resp.List = getAdminArticleList(ctx, list)
 	resp.Total = count
 	return resp, nil
+}
+func getEqCondition(data *AdminArticleListData) map[string]interface{} {
+	condition := make(map[string]interface{})
+	if len(data.ArticleTitle) > 0 {
+		condition["article_title"] = data.ArticleTitle
+	}
+	if data.CategoryId != 0 {
+		condition["category_id"] = data.CategoryId
+	}
+	if data.IsTop != 0 {
+		condition["is_top"] = data.IsTop
+	}
+	if data.TagId != 0 {
+		condition["tag_id"] = data.TagId
+	}
+	if data.Status != 0 {
+		condition["status"] = data.Status
+	}
+	return condition
+}
+
+//	func getNeqCondition(data *AdminArticleListData) map[string]interface{} {
+//		condition := make(map[string]interface{})
+//		if len(data.CreateTime) > 0 {
+//			start, err := time.Parse("2006-01-02 15:04:05", data.CreateTime[0])
+//			if err != nil {
+//				return nil
+//			}
+//			condition["startTime"] = start
+//			end, err := time.Parse("2006-01-02 15:04:05", data.CreateTime[1])
+//			if err != nil {
+//				return nil
+//			}
+//			condition["endTime"] = end
+//		}
+//		return condition
+//	}
+func getAdminArticleList(ctx *gin.Context, list []*articleDao.Article) []*AdminArticle {
+	// 遍历list
+	resp := make([]*AdminArticle, 0, len(list))
+	for _, article := range list {
+
+		// 去article_tag 查询
+		articleTags, err := ArticleTagDao.GetArticleTagByArticleId(GetDB(ctx), article.ID)
+		if err != nil {
+			continue
+		}
+		tagIds := make([]int, 0, len(articleTags))
+		for _, tag := range articleTags {
+			tagIds = append(tagIds, tag.TagId)
+		}
+		tagNameList := make([]string, 0, len(tagIds))
+		tags, err := tagDao.BatchGetTags(GetDB(ctx), tagIds)
+		if err != nil {
+			continue
+		}
+		for _, tag := range tags {
+			tagNameList = append(tagNameList, tag.TagName)
+		}
+		resp = append(resp, &AdminArticle{
+			Article:     *article,
+			TagNameList: tagNameList,
+		})
+	}
+	return resp
 }

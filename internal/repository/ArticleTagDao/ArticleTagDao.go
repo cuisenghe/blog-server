@@ -30,3 +30,11 @@ func BatchCreateArticleTag(db *gorm.DB, articleTags []*ArticleTag) error {
 	}
 	return nil
 }
+func GetArticleTagByArticleId(db *gorm.DB, articleId int) ([]*ArticleTag, error) {
+	var articleTag []*ArticleTag
+	tx := db.Where(&ArticleTag{ArticleId: articleId}).Find(&articleTag)
+	if tx.Error != nil {
+		return articleTag, tx.Error
+	}
+	return articleTag, nil
+}

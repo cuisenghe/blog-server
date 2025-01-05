@@ -98,6 +98,7 @@ func initHandler(r *gin.Engine) {
 		handler := tag.NewHandler()
 		tagGroup.GET("/getTagDictionary", handler.GetTagDictionary)
 		tagGroup.POST("/getTagList", handler.GetTagList)
+		tagGroup.POST("/add", handler.AddTag)
 	}
 	likeGroup := r.Group("/like")
 	{
@@ -115,5 +116,7 @@ func initHandler(r *gin.Engine) {
 	{
 		handler := category.NewHandler()
 		categoryGroup.GET("/getCategoryDictionary", handler.GetCategoryDictionary)
+		categoryGroup.POST("/getCategoryList", handler.GetCategoryList)
+		categoryGroup.POST("/add", handler.AddCategory)
 	}
 }

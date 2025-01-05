@@ -2,6 +2,7 @@ package articleDao
 
 import (
 	constants2 "blog-server/internal/common/constants"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"time"
@@ -90,21 +91,62 @@ func UpdateArticleTop(db *gorm.DB, id int, is_top int) (bool, error) {
 	}
 	return true, nil
 }
-func GetArticleListByCondition(db *gorm.DB, current, size int, condition map[string]interface{}) ([]*Article, error) {
+func GetArticleListByCondition(db *gorm.DB, current, size int, eqCondition map[string]interface{}, gtCondition map[string]interface{}, ltCondition map[string]interface{}) ([]*Article, error) {
 	//db
 	var articles []*Article
 	// 查询
 	offset := (current - 1) * size
-	// 判断condition是否为空
-	if len(condition) > 0 {
-		db = db.Where(condition)
+	// 处理等于
+	if len(eqCondition) > 0 {
+		for k, v := range eqCondition {
+			db = db.Where(fmt.Sprintf("%s = ?", k), v)
+		}
 	}
-	tx := db.Limit(size).Offset(offset).Order("createAt desc").Find(&articles)
+	if len(gtCondition) > 0 {
+		// 处理大于
+		for k, v := range gtCondition {
+			db = db.Where(k+" > ?", v)
+		}
+	}
+	if len(ltCondition) > 0 {
+		// 处理小于
+		for k, v := range ltCondition {
+			db = db.Where(k+" < ?", v)
+		}
+	}
+	tx := db.Limit(size).Offset(offset).Order("createdAt desc").Find(&articles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return articles, nil
 }
+func GetArticleCountByCondition(db *gorm.DB, eqCondition map[string]interface{}, gtCondition map[string]interface{}, ltCondition map[string]interface{}) (int, error) {
+	var count int64
+	// 处理等于
+	if len(eqCondition) > 0 {
+		for k, v := range eqCondition {
+			db = db.Where(fmt.Sprintf("%s = ?", k), v)
+		}
+	}
+	if len(gtCondition) > 0 {
+		// 处理大于
+		for k, v := range gtCondition {
+			db = db.Where(k+" > ?", v)
+		}
+	}
+	if len(ltCondition) > 0 {
+		// 处理小于
+		for k, v := range ltCondition {
+			db = db.Where(k+" < ?", v)
+		}
+	}
+	tx := db.Model(&Article{}).Count(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	return int(count), nil
+}
+
 func GetArticleListByContent(db *gorm.DB, content string) ([]*Article, error) {
 	var articles []*Article
 	tx := db.Where("article_content Like ?", content).

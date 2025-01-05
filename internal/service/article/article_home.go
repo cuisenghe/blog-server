@@ -15,13 +15,6 @@ type ArticleListData struct {
 	Content string `form:"content"`
 	Id      int    `form:"id"`
 }
-
-//	type SimpleArticleListResp struct {
-//		Current int                  `json:"current"`
-//		Size    int                  `json:"size"`
-//		List    []*SimpleArticleList `json:"list"`
-//		Total   int64                `json:"total"`
-//	}
 type SimpleArticleList struct {
 	Year        string           `json:"year"`
 	ArticleList []*SimpleArticle `json:"articleList"`
@@ -123,7 +116,7 @@ func (s *service) GetArticleListByTagId(ctx *gin.Context, req *ArticleListData) 
 	}
 	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"tag_id": req.Id,
-	})
+	}, nil, nil)
 	if err != nil {
 		return resp, err
 	}
@@ -137,7 +130,7 @@ func (s *service) GetArticleListByCategoryId(ctx *gin.Context, req *ArticleListD
 	}
 	condition, err := articleDao.GetArticleListByCondition(GetDB(ctx), req.Current, req.Size, map[string]interface{}{
 		"category_id": req.Id,
-	})
+	}, nil, nil)
 	if err != nil {
 		return resp, err
 	}

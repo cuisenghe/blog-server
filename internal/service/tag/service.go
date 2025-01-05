@@ -10,6 +10,8 @@ import (
 type Service interface {
 	// 获取tag
 	GetTagList(ctx *gin.Context, data *ListData) (*response.PageListResponse, error)
+	AddTag(ctx *gin.Context, tagName string) (int, error)
+	GetTagDict(ctx *gin.Context) ([]*SimpleTagResp, error)
 }
 
 type service struct {

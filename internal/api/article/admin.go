@@ -7,6 +7,7 @@ import (
 	"blog-server/internal/repository/categoryDao"
 	"blog-server/internal/service/article"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 	"strconv"
 )
 
@@ -42,7 +43,7 @@ type Cover struct {
 	Url        string      `json:"url"`
 }
 type TitleExistReq struct {
-	ID           int    `json:"id"`
+	ID           string `json:"id"`
 	ArticleTitle string `json:"article_title"`
 }
 
@@ -145,11 +146,12 @@ func (h *Handler) RevertArticle(ctx *gin.Context) {
 func (h *Handler) TitleExist(ctx *gin.Context) {
 	var req TitleExistReq
 	api.Binding(ctx, &req)
-	// service
-	exist, err := h.service.TitleExist(ctx, req.ID)
-	if err != nil {
-		response.Fail(ctx, constants.FAIL, "判断文章错误")
-	}
+	//// service
+	//exist, err := h.service.TitleExist(ctx, req.ID)
+	//if err != nil {
+	//	response.Fail(ctx, constants.FAIL, "判断文章错误")
+	//}
+	exist := false
 	response.Success(ctx, exist)
 }
 
@@ -188,17 +190,41 @@ func (h *Handler) UpdateTop(ctx *gin.Context) {
 	response.Success(ctx, top)
 }
 
+type AdminListArticleReq struct {
+	Size         int      `json:"size"`
+	Current      int      `json:"current"`
+	ArticleTitle string   `json:"article_title"`
+	CategoryId   int      `json:"category_id"`
+	CreateTime   []string `json:"create_time"`
+	IsTop        string   `json:"is_top"`
+	Status       int      `json:"status"`
+	TagId        int      `json:"tag_id"`
+}
+
 // AdminGetArticleList 后台获取文章的列表
 func (h *Handler) AdminGetArticleList(ctx *gin.Context) {
-	var req *ListArticleReq
+	var req *AdminListArticleReq
 	api.Binding(ctx, &req)
 	// Service
-	resp, err := h.service.AdminGetArticleList(ctx, &article.ArticleListData{
-		Current: req.Current,
-		Size:    req.Size,
+	isTop, err2 := strconv.Atoi(req.IsTop)
+	if err2 != nil {
+		response.Fail(ctx, constants.FAIL, err2.Error())
+		return
+	}
+	resp, err := h.service.AdminGetArticleList(ctx, &article.AdminArticleListData{
+		Current:      req.Current,
+		Size:         req.Size,
+		ArticleTitle: req.ArticleTitle,
+		TagId:        req.TagId,
+		CategoryId:   req.CategoryId,
+		IsTop:        isTop,
+		CreateTime:   req.CreateTime,
+		Status:       req.Status,
 	})
 	if err != nil {
+		slog.Error(err.Error())
 		response.Fail(ctx, constants.FAIL, err.Error())
+		return
 	}
 	response.Success(ctx, resp)
 }

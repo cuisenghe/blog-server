@@ -49,19 +49,34 @@ func BatchGetTags(db *gorm.DB, tagIds []int) ([]*Tag, error) {
 	}
 	return tags, nil
 }
-func GetTagListByCondition(db *gorm.DB, condition map[string]string) ([]*Tag, error) {
+func GetTagListByCondition(db *gorm.DB, tagName string) ([]*Tag, error) {
 	var tags []*Tag
-	tx := db.Where(condition).Find(&tags)
+	if len(tagName) != 0 {
+		db = db.Where("tag_name LIKE ?", "%"+tagName+"%")
+	}
+	tx := db.Model(&Tag{}).Find(&tags)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return tags, nil
 }
-func GetCountByCondition(db *gorm.DB, condition map[string]string) (int, error) {
+func GetCountByCondition(db *gorm.DB, tagName string) (int, error) {
 	var count int64
-	tx := db.Where(condition).Count(&count)
+	if len(tagName) != 0 {
+		db = db.Where("tag_name LIKE ?", "%"+tagName+"%")
+	}
+	tx := db.Model(&Tag{}).Count(&count)
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
 	return int(count), nil
+}
+func AddTag(db *gorm.DB, tagName string) (*Tag, error) {
+	var tag Tag
+	tag.TagName = tagName
+	tx := db.Create(&tag)
+	if tx.Error != nil {
+		return &tag, tx.Error
+	}
+	return &tag, nil
 }

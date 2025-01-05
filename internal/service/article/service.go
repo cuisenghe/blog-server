@@ -1,6 +1,7 @@
 package article
 
 import (
+	"blog-server/internal/common/constants"
 	"blog-server/internal/common/response"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ type Service interface {
 	UpdateArticleStatus(ctx *gin.Context, id, status int) (bool, error)
 
 	UpdateArticleTop(ctx *gin.Context, id, is_top int) (bool, error)
-	AdminGetArticleList(ctx *gin.Context, data *ArticleListData) (*response.PageListResponse, error)
+	AdminGetArticleList(ctx *gin.Context, data *AdminArticleListData) (*response.PageListResponse, error)
 
 	// 前端
 	BlogTimelineGetArticleList(ctx *gin.Context, data *ArticleListData) (*response.PageListResponse, error)
@@ -35,5 +36,5 @@ func NewService() Service {
 	return &service{}
 }
 func GetDB(ctx *gin.Context) *gorm.DB {
-	return ctx.MustGet("DB").(*gorm.DB)
+	return ctx.MustGet(constants.DB).(*gorm.DB)
 }

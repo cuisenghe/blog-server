@@ -17,9 +17,7 @@ type SimpleTagResp struct {
 }
 
 func (s *service) GetTagList(ctx *gin.Context, data *ListData) (*response.PageListResponse, error) {
-	tags, err := tagDao.GetTagListByCondition(GetDB(ctx), map[string]string{
-		"tag_name": data.TagName,
-	})
+	tags, err := tagDao.GetTagListByCondition(GetDB(ctx), data.TagName)
 	if err != nil {
 		return &response.PageListResponse{
 			Total:   0,
@@ -35,9 +33,7 @@ func (s *service) GetTagList(ctx *gin.Context, data *ListData) (*response.PageLi
 			TagName: tag.TagName,
 		})
 	}
-	count, err := tagDao.GetCountByCondition(GetDB(ctx), map[string]string{
-		"tag_name": data.TagName,
-	})
+	count, err := tagDao.GetCountByCondition(GetDB(ctx), data.TagName)
 	if err != nil {
 		return &response.PageListResponse{
 			Total:   0,
@@ -52,4 +48,25 @@ func (s *service) GetTagList(ctx *gin.Context, data *ListData) (*response.PageLi
 		Current: data.Current,
 		Size:    data.Size,
 	}, nil
+}
+func (s *service) AddTag(ctx *gin.Context, tagName string) (int, error) {
+	tag, err := tagDao.AddTag(GetDB(ctx), tagName)
+	if err != nil {
+		return 0, err
+	}
+	return tag.ID, err
+}
+func (s *service) GetTagDict(ctx *gin.Context) ([]*SimpleTagResp, error) {
+	tags, err := tagDao.GetTagListByCondition(GetDB(ctx), "")
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]*SimpleTagResp, 0, len(tags))
+	for _, tag := range tags {
+		resp = append(resp, &SimpleTagResp{
+			ID:      tag.ID,
+			TagName: tag.TagName,
+		})
+	}
+	return resp, nil
 }
